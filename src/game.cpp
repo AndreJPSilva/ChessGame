@@ -1,6 +1,8 @@
 #include "game.hpp"
+#include "position.hpp"
 
 #include <print>
+#include <iostream>
 
 void Game::Draw() const {
 
@@ -35,9 +37,26 @@ Game::~Game() {
 void Game::Run(int argc, const char* argv[]) {
     // Do something with args
 
+    Position x, y;
+    
     Draw();
     
     do {
-        
+        try {
+            std::print("\nFrom: ");
+            std::cin >> x;
+
+            // Update
+
+            std::print("\nTo: ");
+            std::cin >> y;
+
+            // Move
+
+            Draw();
+        } catch (std::runtime_error& e) {
+            Draw();
+            std::println("\n{0}", e.what());
+        }
     } while (!m_is_checkmate);
 }
