@@ -1,6 +1,7 @@
-#include <print>
+#include "game.hpp"
 
 auto main(int argc, const char* argv[]) -> int {
-    std::println("Hello, World");
+    Game game{};
+    game.Run(argc, argv);
     return 0;
 }
