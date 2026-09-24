@@ -8,4 +8,6 @@ public:
     Queen(Board* board, bool isWhite = false);
 
     const char* ToString() const override;
+
+    Moves PossibleMoves() const override;
 };
