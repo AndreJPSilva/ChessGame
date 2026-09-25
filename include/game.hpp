@@ -13,6 +13,10 @@ class Game {
 
     void Clear() const;
 
+    void ThrowIfMoveFrom(const Position& pos) const;
+
+    void ThrowIfMoveTo(const Position& posX, const Position& posY) const;
+    
     Piece* DoMove(const Position& posX, const Position posY);
 public:
     Game();

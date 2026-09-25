@@ -9,6 +9,7 @@
 
 #include <print>
 #include <iostream>
+#include <stdexcept>
 
 void Game::Construct(bool isWhite) {
     for (int col{}; col < Board::Dimensions; col++) {
@@ -97,11 +98,13 @@ void Game::Run(int argc, const char* argv[]) {
         try {
             std::print("\nFrom: ");
             std::cin >> x;
+            ThrowIfMoveFrom(x);
 
             // Update
 
             std::print("\nTo: ");
             std::cin >> y;
+            ThrowIfMoveTo(x, y);
 
             // Move
 
@@ -118,6 +121,22 @@ void Game::Run(int argc, const char* argv[]) {
             std::println("\n{0}", e.what());
         }
     } while (!m_is_checkmate);
+}
+
+void Game::ThrowIfMoveFrom(const Position& pos) const {
+    if (m_board.IsEmpty(pos))
+        throw std::runtime_error("There is no piece the chosen position.");
+
+    if (!(m_board.At(pos)->IsWhite() && m_is_white_turn))
+        throw std::runtime_error("The chosen piece is not yours.");
+
+    if (!m_board.At(pos)->AnyPossibleMove())
+        throw std::runtime_error("The are not possible movements to that piece.");    
+}
+
+void Game::ThrowIfMoveTo(const Position& posX, const Position& posY) const {
+    if (!m_board.At(posX)->PossibleMove(posY))
+        throw std::runtime_error("Invalid movement.");
 }
 
 Piece* Game::DoMove(const Position& posX, const Position posY) {

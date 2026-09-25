@@ -31,7 +31,7 @@ Piece* Board::RemoveAt(const Position& pos) {
         return nullptr;
 
     piece->SetPosition(std::nullopt);
-    m_pieces[pos.row][pos.column] = piece;
+    m_pieces[pos.row][pos.column] = nullptr;
     return piece;
 }
 
