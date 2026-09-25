@@ -73,11 +73,12 @@ void Game::Clear() const {
 }
 
 Game::Game() 
-    : m_board(), m_is_checkmate() {
+    : m_board(), m_is_checkmate(), m_is_white_turn(true), m_check(), m_turn(1) {
 }
 
 Game::~Game() {
-    
+    for (auto piece : m_pieces)
+        delete piece;
 }
 
 void Game::Run(int argc, const char* argv[]) {
@@ -104,6 +105,8 @@ void Game::Run(int argc, const char* argv[]) {
 
             // Move
 
+            DoMove(x, y);
+            
             Clear();
             
             Draw();
@@ -115,4 +118,18 @@ void Game::Run(int argc, const char* argv[]) {
             std::println("\n{0}", e.what());
         }
     } while (!m_is_checkmate);
+}
+
+Piece* Game::DoMove(const Position& posX, const Position posY) {
+    auto self = m_board.RemoveAt(posX);
+    self->IncreaseMove();
+
+    auto target = m_board.RemoveAt(posY);
+
+    if (target)
+        m_captured.insert(target);
+
+    m_board.Add(self, posY);
+
+    return target;
 }
