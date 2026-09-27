@@ -11,6 +11,8 @@ class Game {
     
     void Draw() const;
 
+    void Update(const Position& pos) const;
+
     void Clear() const;
 
     void ThrowIfMoveFrom(const Position& pos) const;

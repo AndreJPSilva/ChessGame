@@ -65,6 +65,41 @@ void Game::Draw() const {
     std::println("  A B C D E F G H");
 }
 
+void Game::Update(const Position& pos) const {
+    auto moves = m_board.At(pos)->PossibleMoves();
+
+    for (int row{}; row < Board::Dimensions; row++) {
+        std::print("{0} ", Board::Dimensions - row);
+        for (int col{}; col < Board::Dimensions; col++) {
+            if (moves[row][col]) {
+                if (row > pos.row && col == pos.column)
+                    std::print("{0} ", "\u2193");
+                else if (row < pos.row && col == pos.column) 
+                    std::print("{0} ", "\u2191");
+                else if (row == pos.row && col < pos.column)
+                    std::print("{0} ", "\u2190");
+                else if (row == pos.row && col > pos.column)
+                    std::print("{0} ", "\u2192");
+                else if (row > pos.row && col > pos.column)
+                    std::print("{0} ", "\u2198");
+                else if (row < pos.row && col > pos.column)
+                    std::print("{0} ", "\u2197");
+                else if (row > pos.row && col < pos.column)
+                    std::print("{0} ", "\u2199");
+                else if (row < pos.row && col < pos.column)
+                    std::print("{0} ", "\u2196");
+            } else {
+                if (auto piece = m_board.At(row, col))
+                    std::print("{0} ", piece->ToString());
+                else 
+                    std::print("{0} ", "\u00B7");
+            }
+        }
+        std::println("");
+    }
+    std::println("  A B C D E F G H");
+}
+
 void Game::Clear() const {
 #if _WIN32
     system("cls");
@@ -100,7 +135,9 @@ void Game::Run(int argc, const char* argv[]) {
             std::cin >> x;
             ThrowIfMoveFrom(x);
 
-            // Update
+            Clear();
+            
+            Update(x);
 
             std::print("\nTo: ");
             std::cin >> y;
