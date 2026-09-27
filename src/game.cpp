@@ -7,6 +7,8 @@
 #include "bishop.hpp"
 #include "knight.hpp"
 
+#include <algorithm>
+#include <iterator>
 #include <print>
 #include <iostream>
 #include <stdexcept>
@@ -143,9 +145,7 @@ void Game::Run(int argc, const char* argv[]) {
             std::cin >> y;
             ThrowIfMoveTo(x, y);
 
-            // Move
-
-            DoMove(x, y);
+            Move(x, y);
             
             Clear();
             
@@ -164,7 +164,7 @@ void Game::ThrowIfMoveFrom(const Position& pos) const {
     if (m_board.IsEmpty(pos))
         throw std::runtime_error("There is no piece the chosen position.");
 
-    if (!(m_board.At(pos)->IsWhite() && m_is_white_turn))
+    if (m_board.At(pos)->IsWhite() != m_is_white_turn)
         throw std::runtime_error("The chosen piece is not yours.");
 
     if (!m_board.At(pos)->AnyPossibleMove())
@@ -174,6 +174,63 @@ void Game::ThrowIfMoveFrom(const Position& pos) const {
 void Game::ThrowIfMoveTo(const Position& posX, const Position& posY) const {
     if (!m_board.At(posX)->PossibleMove(posY))
         throw std::runtime_error("Invalid movement.");
+}
+
+void Game::TurnRound() {
+    m_is_white_turn = !m_is_white_turn;
+    m_turn++;
+}
+
+std::set<Piece*> Game::Captured(bool isWhiteTurn) const {
+    std::set<Piece*> pieces;
+
+    for (auto piece : m_captured) {
+        if ((piece->IsWhite() && isWhiteTurn) || (!piece->IsWhite() && !isWhiteTurn))
+            pieces.insert(piece);
+    }
+
+    return pieces;
+}
+
+std::set<Piece*> Game::AvailablePieces(bool isWhiteTurn) const {
+    std::set<Piece*> pieces, availablePieces;
+
+    for (auto piece : m_pieces) {
+        if ((piece->IsWhite() && isWhiteTurn) || (!piece->IsWhite() && !isWhiteTurn))
+            pieces.insert(piece);
+    }
+
+    auto captured = Captured(isWhiteTurn);
+
+    std::set_difference(pieces.begin(), pieces.end(), captured.begin(), captured.end(), 
+    std::inserter(availablePieces,availablePieces.begin()));
+
+    return availablePieces;
+}
+
+const Piece* Game::GetKing(bool isWhiteTurn) const {
+    for (auto piece : AvailablePieces(isWhiteTurn)) 
+        if (auto isKing = dynamic_cast<King*>(piece))
+            return isKing;
+
+    return nullptr;    
+}
+
+bool Game::IsInCheck(bool isWhiteTurn) const {
+    auto isKing = GetKing(isWhiteTurn);
+
+    if (!isKing)
+        throw std::runtime_error("An unexpected error occurred while trying to find the king.");
+
+    auto pos = isKing->GetPosition();
+
+    for (auto piece : AvailablePieces(isWhiteTurn)) {
+        auto moves = piece->PossibleMoves();
+        if (moves[pos.value().row][pos.value().column])
+            return true;
+    }
+
+    return false;
 }
 
 Piece* Game::DoMove(const Position& posX, const Position posY) {
@@ -188,4 +245,27 @@ Piece* Game::DoMove(const Position& posX, const Position posY) {
     m_board.Add(self, posY);
 
     return target;
+}
+
+void Game::UndoMove(const Position& posX, const Position& posY, Piece* target) {
+    auto self = m_board.RemoveAt(posY);
+    self->DecreaseMove();
+
+    if (target) {
+        m_board.Add(target, posY);
+        m_captured.erase(target);
+    }
+
+    m_board.Add(self, posX);
+}
+
+void Game::Move(const Position& posX, const Position& posY) {
+    auto target = DoMove(posX, posY);
+
+    if (IsInCheck(m_is_white_turn)) {
+        UndoMove(posX, posY, target);
+        throw std::runtime_error("You can't put yourself in check.");
+    }
+
+    TurnRound();
 }

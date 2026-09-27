@@ -12,7 +12,7 @@ Moves Rook::PossibleMoves() const {
     if (!pos.has_value())
         return moves;
 
-    Position next = { pos.value().row - 1, pos.value().column };
+    Position next { pos.value().row - 1, pos.value().column };
 
     while (m_board->CheckBoundries(next) && CanMove(next)) {
         moves[next.row][next.column] = true;

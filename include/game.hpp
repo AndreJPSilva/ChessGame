@@ -19,7 +19,21 @@ class Game {
 
     void ThrowIfMoveTo(const Position& posX, const Position& posY) const;
     
+    void TurnRound();
+    
+    std::set<Piece*> Captured(bool isWhiteTurn) const;
+
+    std::set<Piece*> AvailablePieces(bool isWhiteTurn) const;
+
+    const Piece* GetKing(bool isWhiteTurn) const;
+
+    bool IsInCheck(bool isWhiteTurn) const;
+    
     Piece* DoMove(const Position& posX, const Position posY);
+
+    void UndoMove(const Position& posX, const Position& posY, Piece* target);
+    
+    void Move(const Position& posX, const Position& posY);
 public:
     Game();
 
