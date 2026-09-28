@@ -293,6 +293,18 @@ void Game::Move(const Position& posX, const Position& posY) {
 		throw std::runtime_error("You can't put yourself in check.");
 	}
 
+	// Promotion
+	if (auto pawn = dynamic_cast<const Pawn*>(m_board.At(posY))) {
+		if ((pawn->IsWhite() && posY.row == 0) || (!pawn->IsWhite() && posY.row == 7)) {
+			m_pieces.erase(m_board.RemoveAt(posY));
+			delete pawn;
+
+			auto queen = new Queen(&m_board, m_is_white_turn);
+			m_board.Add(queen, posY);
+			m_pieces.insert(queen);
+		}
+	}
+	
 	m_check = IsInCheck(!m_is_white_turn);
 
 	if (IsCheckMate(!m_is_white_turn))
