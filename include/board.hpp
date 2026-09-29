@@ -19,6 +19,8 @@ public:
 
     const Piece* At(const Position& pos) const;
 
+    Piece* At(const Position& pos);
+
     bool IsEmpty(const Position& pos) const;
 
     bool CheckBoundries(const Position& pos) const;

@@ -2,12 +2,17 @@
 
 #include "piece.hpp"
 
+class Game;
+
 class Pawn : public Piece {
 
 public:
-    Pawn(Board* board, bool isWhite = false);
+    Pawn(Game* game, Board* board, bool isWhite = false);
 
     const char* ToString() const override;
 
     Moves PossibleMoves() const override;
+
+private:
+    Game* m_game;
 };

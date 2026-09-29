@@ -43,12 +43,15 @@ public:
 
 	void Run(int argc, const char* argv[]);
 
+	bool IsVulnerableEnPassant(const Piece* other) const;
+
 private:
 	Board m_board;
 	bool m_is_checkmate;
 	bool m_is_white_turn;
 	bool m_check;
 	int m_turn;
+	Piece* m_vulnerableEnPassant;
 	std::set<Piece*> m_pieces;
 	std::set<Piece*> m_captured;
 };

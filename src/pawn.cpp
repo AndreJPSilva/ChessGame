@@ -1,7 +1,8 @@
 #include "pawn.hpp"
 #include "position.hpp"
+#include "game.hpp"
 
-Pawn::Pawn(Board* board, bool isWhite) : Piece(board, isWhite) {}
+Pawn::Pawn(Game* game, Board* board, bool isWhite) : Piece(board, isWhite), m_game(game) {}
 
 const char* Pawn::ToString() const { return IsWhite() ? "\u2659" : "\u265F"; }
 
@@ -65,6 +66,33 @@ Moves Pawn::PossibleMoves() const {
 
         if (m_board->CheckBoundries(next) && m_board->At(next) != nullptr && !m_board->At(next)->Equals(this))
             moves[next.row][next.column] = true;
+    }
+
+    if (pos.value().row == 3) {
+        Position leftPos { pos.value().row, pos.value().column - 1 };
+        
+        if (m_board->CheckBoundries(leftPos) && !m_board->IsEmpty(leftPos) &&
+            !m_board->At(leftPos)->Equals(this) && m_game->IsVulnerableEnPassant(m_board->At(leftPos)))
+            moves[leftPos.row - 1][leftPos.column] = true;
+
+        Position rightPos { pos.value().row, pos.value().column + 1 };
+        
+        if (m_board->CheckBoundries(rightPos) && !m_board->IsEmpty(rightPos) &&
+            !m_board->At(rightPos)->Equals(this) && m_game->IsVulnerableEnPassant(m_board->At(rightPos)))
+            moves[rightPos.row - 1][rightPos.column] = true;
+    } else if (pos.value().row == 4) {
+        
+        Position leftPos { pos.value().row, pos.value().column - 1 };
+        
+        if (m_board->CheckBoundries(leftPos) && !m_board->IsEmpty(leftPos) &&
+            !m_board->At(leftPos)->Equals(this) && m_game->IsVulnerableEnPassant(m_board->At(leftPos)))
+            moves[leftPos.row + 1][leftPos.column] = true;
+
+        Position rightPos { pos.value().row, pos.value().column + 1 };
+        
+        if (m_board->CheckBoundries(rightPos) && !m_board->IsEmpty(rightPos) &&
+            !m_board->At(rightPos)->Equals(this) && m_game->IsVulnerableEnPassant(m_board->At(rightPos)))
+            moves[rightPos.row + 1][rightPos.column] = true;
     }
     
     return moves;

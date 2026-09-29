@@ -15,7 +15,7 @@
 
 void Game::Construct(bool isWhite) {
 	for (int col{}; col < Board::Dimensions; col++) {
-		auto pawn = new Pawn(&m_board, isWhite);
+		auto pawn = new Pawn(this, &m_board, isWhite);
 		m_board.Add(pawn, { isWhite ? 6 : 1, col });
 		m_pieces.insert(pawn);
 	}
@@ -110,11 +110,15 @@ void Game::Clear() const {
 #endif   
 }
 
-Game::Game() : m_board(), m_is_checkmate(), m_is_white_turn(true), m_check(), m_turn(1) {}
+Game::Game() : m_board(), m_is_checkmate(), m_is_white_turn(true), m_check(), m_turn(1), m_vulnerableEnPassant(nullptr) {}
 
 Game::~Game() {
 	for (auto piece : m_pieces)
 		delete piece;
+}
+
+bool Game::IsVulnerableEnPassant(const Piece* other) const {
+	return m_vulnerableEnPassant && m_vulnerableEnPassant->Equals(other);
 }
 
 void Game::Run(int argc, const char* argv[]) {
@@ -270,6 +274,13 @@ Piece* Game::DoMove(const Position& posX, const Position& posY) {
 
 	m_board.Add(self, posY);
 
+	// EnPassant
+	if (dynamic_cast<Pawn*>(self) && posX.column != posY.column && target == nullptr) {
+		Position pos{ self->IsWhite() ? posY.row + 1 : posY.row - 1, posY.column };
+		target = m_board.RemoveAt(pos);
+		m_captured.insert(target);
+	}
+
 	return target;
 }
 
@@ -283,6 +294,14 @@ void Game::UndoMove(const Position& posX, const Position& posY, Piece* target) {
 	}
 
 	m_board.Add(self, posX);
+
+	// EnPassant
+	if (dynamic_cast<Pawn*>(self) && posX.column != posY.column && IsVulnerableEnPassant(target)) {
+		auto piece = m_board.RemoveAt(posY);
+		Position pos{ self->IsWhite() ? 3 : 4, posY.column };
+		m_board.Add(piece, pos);
+		m_captured.erase(target);
+	}
 }
 
 void Game::Move(const Position& posX, const Position& posY) {
@@ -293,8 +312,8 @@ void Game::Move(const Position& posX, const Position& posY) {
 		throw std::runtime_error("You can't put yourself in check.");
 	}
 
-	// Promotion
-	if (auto pawn = dynamic_cast<const Pawn*>(m_board.At(posY))) {
+	if (auto pawn = dynamic_cast<Pawn*>(m_board.At(posY))) {
+		// Promotion
 		if ((pawn->IsWhite() && posY.row == 0) || (!pawn->IsWhite() && posY.row == 7)) {
 			m_pieces.erase(m_board.RemoveAt(posY));
 			delete pawn;
@@ -303,8 +322,14 @@ void Game::Move(const Position& posX, const Position& posY) {
 			m_board.Add(queen, posY);
 			m_pieces.insert(queen);
 		}
+
+		// EnPassant
+		if (posY.row == posX.row - 2 || posY.row == posX.row + 2)
+			m_vulnerableEnPassant = reinterpret_cast<Piece*>(pawn);
+		else
+			m_vulnerableEnPassant = nullptr;
 	}
-	
+
 	m_check = IsInCheck(!m_is_white_turn);
 
 	if (IsCheckMate(!m_is_white_turn))

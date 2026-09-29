@@ -7,6 +7,8 @@ const Piece* Board::At(int row, int col) const { return m_pieces[row][col]; }
 
 const Piece* Board::At(const Position& pos) const { return m_pieces[pos.row][pos.column]; }
 
+Piece* Board::At(const Position& pos) { return m_pieces[pos.row][pos.column]; }
+
 bool Board::IsEmpty(const Position& pos) const {
     ThrowIf(pos);
     return m_pieces[pos.row][pos.column] == nullptr;

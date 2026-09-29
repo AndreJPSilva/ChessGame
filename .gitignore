@@ -37,3 +37,7 @@ CMakeUserPresets.json
 # Clangd LSP Cache
 .cache/
 .clangd/
+
+# Debug resources
+.vscode/
+.vs/
