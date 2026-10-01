@@ -28,7 +28,7 @@ void Game::Construct(bool isWhite) {
 	m_board.Add(rook, { isWhite ? 7 : 0, 7 });
 	m_pieces.insert(rook);
 
-	auto king = new King(&m_board, isWhite);
+	auto king = new King(this, &m_board, isWhite);
 	m_board.Add(king, { isWhite ? 7 : 0, 4 });
 	m_pieces.insert(king);
 
@@ -116,6 +116,8 @@ Game::~Game() {
 	for (auto piece : m_pieces)
 		delete piece;
 }
+
+bool Game::Check() const { return m_check; }
 
 bool Game::IsVulnerableEnPassant(const Piece* other) const {
 	return m_vulnerableEnPassant && m_vulnerableEnPassant->Equals(other);
@@ -281,6 +283,26 @@ Piece* Game::DoMove(const Position& posX, const Position& posY) {
 		m_captured.insert(target);
 	}
 
+	if (dynamic_cast<King*>(self)) {
+		// Short Castling
+		if (posY.column == posX.column + 2) {
+			Position rookPosX { posX.row, posX.column + 3 };
+			Position rookPosY { posX.row, posX.column + 1 };
+			auto rook = m_board.RemoveAt(rookPosX);
+			rook->IncreaseMove();
+			m_board.Add(rook, rookPosY);
+		}
+
+		// Long Castling
+		if (posY.column == posX.column - 2) {
+			Position rookPosX { posX.row, posX.column - 4 };
+			Position rookPosY { posX.row, posX.column - 1 };
+			auto rook = m_board.RemoveAt(rookPosX);
+			rook->IncreaseMove();
+			m_board.Add(rook, rookPosY);
+		}
+	}
+
 	return target;
 }
 
@@ -301,6 +323,26 @@ void Game::UndoMove(const Position& posX, const Position& posY, Piece* target) {
 		Position pos{ self->IsWhite() ? 3 : 4, posY.column };
 		m_board.Add(piece, pos);
 		m_captured.erase(target);
+	}
+
+	if (dynamic_cast<King*>(self)) {
+		// Short Castling
+		if (posY.column == posX.column + 2) {
+			Position rookPosX { posX.row, posX.column + 3 };
+			Position rookPosY { posX.row, posX.column + 1 };
+			auto rook = m_board.RemoveAt(rookPosY);
+			rook->DecreaseMove();
+			m_board.Add(rook, rookPosX);
+		}
+
+		// Long Castling
+		if (posY.column == posX.column - 2) {
+			Position rookPosX { posX.row, posX.column - 4 };
+			Position rookPosY { posX.row, posX.column - 1 };
+			auto rook = m_board.RemoveAt(rookPosY);
+			rook->DecreaseMove();
+			m_board.Add(rook, rookPosX);
+		}
 	}
 }
 

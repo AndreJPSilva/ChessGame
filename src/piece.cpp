@@ -38,6 +38,8 @@ bool Piece::Equals(const Piece* other) const {
 
 bool Piece::IsWhite() const { return m_is_white; }
 
+bool Piece::WasMove() const { return m_move_count > 0; }
+
 std::optional<Position> Piece::GetPosition() const { return m_pos; }
 
 void Piece::SetPosition(std::optional<Position> pos) { m_pos = pos; }

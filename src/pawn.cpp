@@ -27,7 +27,7 @@ Moves Pawn::PossibleMoves() const {
         next2.column = pos.value().column;
 
         if (m_board->CheckBoundries(next) && m_board->At(next) == nullptr &&
-            m_board->CheckBoundries(next2) && m_board->At(next2) == nullptr && m_move_count == 0)
+            m_board->CheckBoundries(next2) && m_board->At(next2) == nullptr && !WasMove())
             moves[next2.row][next2.column] = true;
 
         next.row = pos.value().row - 1;
@@ -52,7 +52,7 @@ Moves Pawn::PossibleMoves() const {
         next2.column = pos.value().column;
 
         if (m_board->CheckBoundries(next) && m_board->At(next) == nullptr &&
-            m_board->CheckBoundries(next2) && m_board->At(next2) == nullptr && m_move_count == 0)
+            m_board->CheckBoundries(next2) && m_board->At(next2) == nullptr && !WasMove())
             moves[next2.row][next2.column] = true;
 
         next.row = pos.value().row + 1;

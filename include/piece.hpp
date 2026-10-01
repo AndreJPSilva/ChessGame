@@ -29,6 +29,8 @@ public:
     
     bool IsWhite() const;
 
+    bool WasMove() const;
+    
     std::optional<Position> GetPosition() const;
 
     void SetPosition(std::optional<Position> pos);

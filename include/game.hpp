@@ -43,6 +43,8 @@ public:
 
 	void Run(int argc, const char* argv[]);
 
+	bool Check() const;
+	
 	bool IsVulnerableEnPassant(const Piece* other) const;
 
 private:
